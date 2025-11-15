@@ -1,0 +1,7 @@
+_target_: ood_slam.models.DeepVO
+rnn_hidden_size: 1000
+conv_dropout: [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.5]
+rnn_dropout_out: 0.5
+rnn_dropout_between: 0
+batch_norm: true
+pretrained_flownet: null

@@ -1,0 +1,31 @@
+experiment_name: ood_slam_deepvo
+seed: 42
+learning_rate: 0.001
+batch_size: 32
+max_epochs: 10
+scratch_dir: ${get_constant:SCRATCH}
+slurm_tmpdir: ${get_constant:SLURM_TMPDIR}
+use_wandb: true
+wandb:
+  project: ood-slam
+  name: ${experiment_name}_${now:%Y%m%d_%H%M%S}
+debug: false
+model:
+  hidden_dim: 256
+  num_layers: 3
+  dropout: 0.1
+  checkpoint_dir: ${scratch_dir}/checkpoints
+  pretrained_weights: null
+  learning_rate: ${learning_rate}
+data:
+  data_dir: ${get_constant:DATA_DIR}
+  dataset_name: kitti
+  cache_dir: ${scratch_dir}/data_cache
+  batch_size: ${batch_size}
+  num_workers: 4
+  pin_memory: true
+  persistent_workers: true
+  image_size:
+  - 224
+  - 224
+  normalize: true

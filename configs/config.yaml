@@ -1,0 +1,27 @@
+defaults:
+  - _self_  
+  - model: deepvo  
+  - data: deepvo_kitti     
+  #- resources: cpu  # Default to local development
+  #- hydra: default
+
+# Experiment identification
+experiment_name: "ood_slam_deepvo"
+seed: 42
+
+# Training hyperparameters
+learning_rate: 0.001
+batch_size: 32
+max_epochs: 10
+
+# Global paths (experiment-wide)
+scratch_dir: "${get_constant:SCRATCH}"
+slurm_tmpdir: "${get_constant:SLURM_TMPDIR}"
+
+# Logging and tracking
+use_wandb: true
+wandb:
+  project: "ood-slam"
+  name: "${experiment_name}_${now:%Y%m%d_%H%M%S}"
+
+debug: false

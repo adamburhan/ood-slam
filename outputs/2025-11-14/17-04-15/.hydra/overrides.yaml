@@ -1,0 +1,2 @@
+- seed=2
+- model.hidden_dim=1000
