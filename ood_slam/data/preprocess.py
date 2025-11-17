@@ -11,8 +11,9 @@ import math
 from omegaconf import DictConfig
 import hydra
 import ood_slam
-import ood_slam.configs
+from ood_slam.configs import register_configs
 from pathlib import Path
+from hydra_plugins.auto_schema import auto_schema_plugin
 
 def clean_unused_images(image_dir):
 	seq_frame = {'00': ['000', '004540'],
@@ -113,6 +114,18 @@ def calculate_rgb_mean_std(image_path_list, minus_point_5=False):
 
 PROJECT_NAME = ood_slam.__name__
 REPO_ROOTDIR = Path(__file__).parent.parent.parent
+
+# Configure auto schema plugin
+auto_schema_plugin.config = auto_schema_plugin.AutoSchemaPluginConfig(
+    schemas_dir=REPO_ROOTDIR / ".schemas",
+    regen_schemas=False,
+    stop_on_error=False,
+    quiet=False,
+    verbose=False,
+    add_headers=False,  # don't fallback to adding headers if we can't use vscode settings file.
+)
+
+register_configs()
 
 @hydra.main(version_base="1.3", config_path=f"pkg://{PROJECT_NAME}.configs", config_name="preprocess_kitti")
 def main(cfg: DictConfig):
