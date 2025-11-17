@@ -24,4 +24,4 @@ hydra:
     stderr_to_stdout: true
     setup:
       - export PROJECT_ROOT="$PWD"
-      - export PYTHONPATH="$PROJECT_ROOT${PYTHONPATH:+:$PYTHONPATH}"
+      - export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
