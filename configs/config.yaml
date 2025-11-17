@@ -2,7 +2,9 @@ defaults:
   - _self_  
   - model: deepvo  
   - data: deepvo_kitti     
-  #- resources: cpu  # Default to local development
+  - resources: cpu  # Default to local development
+  - experiment: null
+  - cluster: null
   #- hydra: default
 
 # Experiment identification

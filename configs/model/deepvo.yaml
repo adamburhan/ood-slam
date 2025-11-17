@@ -1,4 +1,4 @@
-_target_: ood_slam.models.DeepVO
+#_target_: ood_slam.models.DeepVO
 rnn_hidden_size: 1000
 conv_dropout: [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.5]
 rnn_dropout_out: 0.5

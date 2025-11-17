@@ -1,8 +1,7 @@
 # @package _global_
 defaults:
-  - /model: deepvo
-  - /data: deepvo_kitti
-  - /resources: gpu
+  - override /model: deepvo
+  - override /data: deepvo_kitti
 
 experiment_name: "deepvo_reproduction"
 learning_rate: 0.0005

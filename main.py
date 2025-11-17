@@ -4,11 +4,8 @@ import torch
 from omegaconf import DictConfig, OmegaConf
 from rich.logging import RichHandler
 
-# Import utilities to register resolvers
-from utils.env_vars import get_constant
-
-# Register the environment variable resolver
-OmegaConf.register_new_resolver("get_constant", get_constant)
+# Import configurations (registers resolvers and launcher plugin)
+import configs
 
 # Set up logging
 logging.basicConfig(
