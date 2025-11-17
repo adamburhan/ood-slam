@@ -18,11 +18,12 @@ from rich.logging import RichHandler
 from hydra_plugins.auto_schema import auto_schema_plugin
 
 import ood_slam
-import ood_slam.configs
+from ood_slam.configs import register_configs
 
 PROJECT_NAME = ood_slam.__name__
 REPO_ROOTDIR = Path(__file__).parent.parent
 logger = logging.getLogger(__name__)
+
 
 # Configure auto schema plugin
 auto_schema_plugin.config = auto_schema_plugin.AutoSchemaPluginConfig(
@@ -33,6 +34,8 @@ auto_schema_plugin.config = auto_schema_plugin.AutoSchemaPluginConfig(
     verbose=False,
     add_headers=False,  # don't fallback to adding headers if we can't use vscode settings file.
 )
+
+register_configs()
 
 # Set up logging
 logging.basicConfig(

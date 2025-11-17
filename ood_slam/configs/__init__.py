@@ -22,4 +22,4 @@ def register_configs():
     )
 
 # Auto-register when imported
-register_configs()
+#register_configs()
