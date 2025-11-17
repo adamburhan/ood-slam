@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 import pandas as pd
 import os
-from .image_seq_dataset import SortedRandomBatchSampler, ImageSequenceDataset, get_data_info
+from ood_slam.data.image_seq_dataset import SortedRandomBatchSampler, ImageSequenceDataset, get_data_info
 
 
 class ImageSequenceDataModule:

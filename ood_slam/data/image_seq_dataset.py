@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 from torch.utils.data.sampler import Sampler
 from torchvision import transforms
 import time
-from data.utils import normalize_angle_delta
+from ood_slam.data.utils import normalize_angle_delta
 
 
 def get_data_info(folder_list, seq_len_range, overlap, sample_times=1, 

@@ -1,5 +1,5 @@
 # DeepVO KITTI Dataset Configuration
-_target_: data.image_seq_datamodule.ImageSequenceDataModule
+_target_: ood_slam.data.image_seq_datamodule.ImageSequenceDataModule
 
 data_dir: "${get_constant:DATA_DIR}/KITTI"
 

@@ -1,0 +1,15 @@
+{
+  "redhat.telemetry.enabled": false,
+  "yaml.schemas": {
+    ".schemas/configs_config_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/config.yaml",
+    ".schemas/configs_preprocess_kitti_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/preprocess_kitti.yaml",
+    ".schemas/experiment_deepvo_reproduction_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/experiment/deepvo_reproduction.yaml",
+    ".schemas/hydra_default_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/hydra/default.yaml",
+    ".schemas/model_deepvo_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/model/deepvo.yaml",
+    ".schemas/resources_cpu_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/resources/cpu.yaml",
+    ".schemas/resources_gpu_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/resources/gpu.yaml",
+    ".schemas/cluster_mila_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/cluster/mila.yaml",
+    ".schemas/cluster_narval_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/cluster/narval.yaml",
+    ".schemas/data_deepvo_kitti_schema.json": "/home/adam/Documents/MILA/projects/ood-slam/ood_slam/configs/data/deepvo_kitti.yaml"
+  }
+}
