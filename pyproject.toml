@@ -71,20 +71,7 @@ python-preference = "system"
 ## the requested version. In a tie, choose the DRAC wheel.
 index-strategy = "unsafe-best-match"
 
-[[tool.uv.index]]
-name = "drac-gentoo2023-x86-64-v3"
-url = "/cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/x86-64-v3"
-format = "flat"
 
-[[tool.uv.index]]
-name = "drac-gentoo2023-generic"
-url = "/cvmfs/soft.computecanada.ca/custom/python/wheelhouse/gentoo2023/generic"
-format = "flat"
-
-[[tool.uv.index]]
-name = "drac-generic"
-url = "/cvmfs/soft.computecanada.ca/custom/python/wheelhouse/generic"
-format = "flat"
 
 [tool.uv.sources]
 remote-slurm-executor = { git = "https://github.com/adamburhan/remote-slurm-executor", branch = "master" }
