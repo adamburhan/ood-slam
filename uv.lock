@@ -2470,7 +2470,7 @@ requires-dist = [
     { name = "lightning", specifier = ">=2.4.0" },
     { name = "matplotlib", specifier = ">=3.9.2" },
     { name = "optree", specifier = ">=0.15.0" },
-    { name = "remote-slurm-executor", git = "https://github.com/lebrice/remote-slurm-executor?branch=master" },
+    { name = "remote-slurm-executor", git = "https://github.com/adamburhan/remote-slurm-executor?branch=master" },
     { name = "rich", specifier = ">=13.7.1" },
     { name = "torch", specifier = "==2.4.1" },
     { name = "torchvision", specifier = ">=0.19.0" },
@@ -3716,7 +3716,7 @@ wheels = [
 [[package]]
 name = "remote-slurm-executor"
 version = "0.1.0"
-source = { git = "https://github.com/lebrice/remote-slurm-executor?branch=master#11615f92eba4c0c3e58b5767b6c9de35aa42a61c" }
+source = { git = "https://github.com/adamburhan/remote-slurm-executor?branch=master#df9658a90e11ac315cbf4441c9aac6971d2e8273" }
 dependencies = [
     { name = "milatools" },
     { name = "setuptools" },

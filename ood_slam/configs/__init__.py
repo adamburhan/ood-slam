@@ -4,8 +4,8 @@ from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
 
 # Import to trigger registration
-from utils.remote_launcher_plugin import RemoteSlurmQueueConf
-from utils.env_vars import get_constant
+from ood_slam.utils.remote_launcher_plugin import RemoteSlurmQueueConf
+from ood_slam.utils.env_vars import get_constant
 
 # Register resolvers
 OmegaConf.register_new_resolver("get_constant", get_constant)

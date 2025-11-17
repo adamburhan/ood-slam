@@ -3,9 +3,10 @@ import hydra
 import torch
 from omegaconf import DictConfig, OmegaConf
 from rich.logging import RichHandler
+import ood_slam
 
 # Import configurations (registers resolvers and launcher plugin)
-import configs
+import ood_slam.configs
 
 # Set up logging
 logging.basicConfig(
@@ -15,8 +16,10 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+PROJECT_NAME = ood_slam.__name__
+
 @hydra.main(
-    config_path="configs", 
+    config_path=f"pkg://{PROJECT_NAME}.configs", 
     config_name="config",
     version_base="1.3",  # Updated to newer version
 )
