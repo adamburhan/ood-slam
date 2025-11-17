@@ -9,6 +9,7 @@ defaults:
 
 # Experiment identification
 experiment_name: "ood_slam_deepvo"
+name: "${experiment_name}"  # Used by Hydra for logging directories
 seed: 42
 
 # Training hyperparameters
