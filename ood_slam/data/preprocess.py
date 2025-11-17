@@ -12,6 +12,7 @@ from omegaconf import DictConfig
 import hydra
 import ood_slam
 import ood_slam.configs
+from pathlib import Path
 
 def clean_unused_images(image_dir):
 	seq_frame = {'00': ['000', '004540'],
@@ -111,6 +112,7 @@ def calculate_rgb_mean_std(image_path_list, minus_point_5=False):
 	print('std_np = ', std_np)
 
 PROJECT_NAME = ood_slam.__name__
+REPO_ROOTDIR = Path(__file__).parent.parent.parent
 
 @hydra.main(version_base="1.3", config_path=f"pkg://{PROJECT_NAME}.configs", config_name="preprocess_kitti")
 def main(cfg: DictConfig):
