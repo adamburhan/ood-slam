@@ -77,5 +77,15 @@ index-strategy = "unsafe-best-match"
 remote-slurm-executor = { git = "https://github.com/adamburhan/remote-slurm-executor", branch = "master" }
 
 
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
 [tool.hatch.build.targets.wheel]
 packages = ["ood_slam"]
