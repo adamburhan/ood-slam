@@ -1,0 +1,13 @@
+# @package _global_
+# Test cluster config that runs locally without remote submission
+
+hydra:
+  mode: RUN  # Single run instead of multirun
+  launcher:
+    _target_: hydra._internal.BasicLauncher
+
+# Override to use local resources
+trainer:
+  accelerator: cpu
+  devices: 1
+  max_epochs: 1  # Quick test
