@@ -22,6 +22,3 @@ hydra:
       internet_access_on_compute_nodes: true
 
     stderr_to_stdout: true
-    setup:
-      - export PROJECT_ROOT="$PWD"
-      - export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"

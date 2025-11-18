@@ -19,5 +19,5 @@ hydra:
 
 
     ## A list of commands to add to the generated sbatch script before running srun:
-    # setup:
-    # - export LD_PRELOAD=/some/folder/with/libraries/
+    setup:
+      - export PYTHONPATH="$PWD:$PYTHONPATH"
