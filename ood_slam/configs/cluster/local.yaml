@@ -3,8 +3,6 @@
 
 hydra:
   mode: RUN  # Single run instead of multirun
-  launcher:
-    _target_: hydra._internal.BasicLauncher
 
 # Override to use local resources
 trainer:
