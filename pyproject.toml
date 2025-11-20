@@ -25,6 +25,7 @@ dependencies = [
     "remote-slurm-executor",
     "hydra-auto-schema>=0.0.7",
     "hydra-orion-sweeper>=1.6.4 ; python_full_version < '3.11'",
+    "plotly>=6.5.0",
 ]
 
 [dependency-groups]

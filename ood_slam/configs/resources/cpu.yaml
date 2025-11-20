@@ -18,6 +18,6 @@ hydra:
       time: 1-00:00:00 # maximum wall time allocated for the job (D-HH:MM:SS)
 
 
-    ## A list of commands to add to the generated sbatch script before running srun:
-    setup:
-      - export PYTHONPATH="$PWD:$PYTHONPATH"
+    # ## A list of commands to add to the generated sbatch script before running srun:
+    # setup:
+    #   - export PYTHONPATH="$PWD:$PYTHONPATH"
