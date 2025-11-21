@@ -14,6 +14,8 @@ class Config:
     # Data configuration  
     data: Any
     
+    preprocessing: Any
+    
     # Experiment settings
     name: str = "default"
     seed: int = field(default_factory=lambda: random.randint(0, int(1e5)))
