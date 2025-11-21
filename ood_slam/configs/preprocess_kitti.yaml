@@ -10,8 +10,8 @@ defaults:
 name: "preprocess"
 
 data:
-  raw_data_dir: "${get_constant:DATA_DIR}/KITTI_raw"
-  processed_data_dir: "${get_constant:DATA_DIR}/KITTI"
+  raw_data_dir: "/home/adamb14/scratch/ood_slam/datasets/KITTI"
+  #processed_data_dir: "${get_constant:DATA_DIR}/KITTI"
 
 preprocessing:
   clean_images: true
