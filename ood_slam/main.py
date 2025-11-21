@@ -45,7 +45,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 @hydra.main(
-    config_path=f"pkg://{PROJECT_NAME}.configs", 
+    config_path=f"configs", 
     config_name="config",
     version_base="1.3",  # Updated to newer version
 )
