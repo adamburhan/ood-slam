@@ -51,7 +51,7 @@ log = logging.getLogger(__name__)
 )
 def main(cfg: DictConfig) -> None:
     log.info("Starting OOD-SLAM")
-    log.info(f"Experiment: {cfg.experiment_name}")
+    # log.info(f"Experiment: {cfg.experiment_name}")
     log.info(f"Seed: {cfg.seed}")
     
     # Check CUDA availability
