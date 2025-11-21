@@ -8,6 +8,11 @@ import random
 @dataclass
 class Config:
     """Base configuration for ood-slam experiments."""
+    # Model configuration
+    model: Any
+    
+    # Data configuration  
+    data: Any
     
     # Experiment settings
     name: str = "default"
@@ -30,11 +35,6 @@ class Config:
     # Debug mode
     debug: bool = False
     
-    # Model configuration
-    model: Any
-    
-    # Data configuration  
-    data: Any
     
     # Trainer configuration
     trainer: dict[str, Any] = field(default_factory=lambda: {
