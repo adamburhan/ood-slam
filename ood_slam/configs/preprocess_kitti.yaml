@@ -7,7 +7,6 @@ defaults:
   - cluster: null
   - experiment: null
 
-experiment_name: "preprocess_kitti"
 name: "preprocess"
 
 data:
