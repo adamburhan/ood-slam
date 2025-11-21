@@ -1,11 +1,14 @@
 defaults:
+  - base_config
   - _self_
+  - model: null
+  - data: null
   - resources: cpu
   - cluster: null
   - experiment: null
 
 experiment_name: "preprocess_kitti"
-name: "${experiment_name}"
+name: "preprocess"
 
 data:
   raw_data_dir: "${get_constant:DATA_DIR}/KITTI_raw"
