@@ -45,8 +45,8 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 @hydra.main(
-    config_path=None, 
-    config_name="base_config",
+    config_path=f"pkg://{PROJECT_NAME}.configs", 
+    config_name="config",
     version_base="1.3",  # Updated to newer version
 )
 def main(cfg: DictConfig) -> None:

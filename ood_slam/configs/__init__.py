@@ -25,5 +25,9 @@ def register_configs():
         provider="Mila",
     )
 
-# Auto-register when imported
-register_configs()
+# # Auto-register when imported
+# register_configs()
+
+__all__ = [
+    "Config",
+]
