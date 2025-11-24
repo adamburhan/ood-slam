@@ -31,7 +31,12 @@ class Config:
     use_wandb: bool = True
     wandb: dict[str, Any] = field(default_factory=lambda: {
         "project": "ood-slam",
-        "name": "${experiment_name}_${now:%Y%m%d_%H%M%S}"
+        "name": "${name}_${now:%Y%m%d_%H%M%S}",
+        "entity": None,  # Set to your wandb username/team if needed
+        "group": None,   # For grouping related experiments
+        "job_type": "train",
+        "notes": "",
+        "tags": []
     })
     
     # Debug mode
