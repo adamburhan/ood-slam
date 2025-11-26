@@ -56,7 +56,6 @@ log = logging.getLogger(__name__)
     version_base="1.3",  # Updated to newer version
 )
 def main(cfg: DictConfig) -> None:
-    log.info("Starting OOD-SLAM")
     log.info(f"Config:\n{OmegaConf.to_yaml(cfg)}")
     
     # Setup device

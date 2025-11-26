@@ -168,7 +168,6 @@ class DeepVO(BaseModel):
         out = self.rnn_drop_out(x)
         out = self.linear(out)
         return out
-        
     
     def encode_image(self, x):
         out_conv2 = self.conv2(self.conv1(x))
