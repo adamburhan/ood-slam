@@ -111,6 +111,7 @@ class RemoteSlurmLauncher(BaseSubmititLauncher):
         additional_parameters: dict | None = None,
         tasks_per_node: int | None = None,
         mem_gb: int | None = None,
+        python: str | None = None,
     ) -> None:
         setup = setup or []
         additional_parameters = additional_parameters or {}
@@ -139,6 +140,11 @@ class RemoteSlurmLauncher(BaseSubmititLauncher):
             ntasks_per_node = tasks_per_node
         if ntasks_per_node is not None:
             additional_parameters["ntasks-per-node"] = ntasks_per_node
+        
+        # Add python path to submitit parameters if provided
+        if python is not None:
+            additional_parameters["python"] = python
+            
         super().__init__(
             account=account,
             array_parallelism=array_parallelism,
@@ -322,6 +328,9 @@ class PatchedSlurmQueueConf(_AddedArgumentsConf, SlurmQueueConf):
 
     setup: list[str] | None = None
     """A list of commands to run in sbatch before running srun."""
+
+    python: str | None = None
+    """The python executable to use for the job."""
 
 
 ConfigStore.instance().store(
