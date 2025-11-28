@@ -9,4 +9,4 @@ rnn_dropout_between: 0
 batch_norm: true
 # Set this to a path to use pretrained FlowNet weights
 # Example: pretrained_flownet: "${get_constant:DATA_DIR}/pretrained/flownets_EPE1.951.pth.tar"
-pretrained_flownet: "${get_constant:DATA_DIR}/pretrained/flownets_EPE1.951.pth"
+pretrained_flownet: null  # Disable for first training

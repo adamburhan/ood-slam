@@ -154,8 +154,8 @@ class DeepVO(BaseModel):
     
     def forward(self, x):
         # x: (batch, seq_len, channel, width, height)
-        # stack image
-        x = torch.cat(x[:, :-1], x[:, 1:], dim=2)
+        # stack consecutive image pairs
+        x = torch.cat((x[:, :-1], x[:, 1:]), dim=2)
         batch_size = x.size(0)
         seq_len = x.size(1)
         # CNN
@@ -165,7 +165,7 @@ class DeepVO(BaseModel):
         
         # RNN
         out, hc = self.rnn(x)
-        out = self.rnn_drop_out(x)
+        out = self.rnn_drop_out(out)
         out = self.linear(out)
         return out
     

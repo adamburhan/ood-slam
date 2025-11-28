@@ -1,7 +1,8 @@
 # DeepVO KITTI Dataset Configuration
 _target_: ood_slam.data.image_seq_datamodule.ImageSequenceDataModule
 
-data_dir: "${get_constant:DATA_DIR}/KITTI"
+# Use SLURM_TMPDIR when available (compute nodes), otherwise fallback to DATA_DIR
+data_dir: "${get_constant:SLURM_TMPDIR,${get_constant:DATA_DIR}}/KITTI"
 
 # Dataset splits (from original DeepVO parameters)
 train_sequences: ['00', '01', '02', '05', '08', '09']
