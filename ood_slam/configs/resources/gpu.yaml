@@ -6,7 +6,7 @@ hydra:
   mode: MULTIRUN
   launcher:
     cpus_per_task: 4
-    gpus_per_task: 1
+    gpus_per_node: 1
     array_parallelism: 16 # max num of jobs to run in parallel
     # Other things to pass to `sbatch`:
     additional_parameters:
