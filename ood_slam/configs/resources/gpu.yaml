@@ -10,7 +10,7 @@ hydra:
     array_parallelism: 16 # max num of jobs to run in parallel
     # Other things to pass to `sbatch`:
     additional_parameters:
-      time: 1-00:00:00 # maximum wall time allocated for the job (D-HH:MM:SS)
+      time: 0-05:00:00 # maximum wall time allocated for the job (D-HH:MM:SS)
       # TODO: It would be better to have those be arguments to the launcher (as is the case in the
       # RemoteLauncherPlugin), that way we could use only SLURM argument names..
       nodes: 1
