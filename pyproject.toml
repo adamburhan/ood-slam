@@ -26,6 +26,7 @@ dependencies = [
     "hydra-orion-sweeper>=1.6.4 ; python_full_version < '3.11'",
     "plotly>=6.5.0",
     "remote-slurm-executor",
+    "submitit>=1.5.3",
 ]
 
 [dependency-groups]
