@@ -141,9 +141,9 @@ class RemoteSlurmLauncher(BaseSubmititLauncher):
         if ntasks_per_node is not None:
             additional_parameters["ntasks-per-node"] = ntasks_per_node
         
-        # Add python path to submitit parameters if provided
+        # Set python executable on the executor if provided
         if python is not None:
-            additional_parameters["python"] = python
+            self.executor.python = python
             
         super().__init__(
             account=account,
