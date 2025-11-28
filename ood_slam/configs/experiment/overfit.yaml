@@ -1,18 +1,14 @@
 # Overfitting experiment config
 # @package _global_
-defaults:
-  - base_config
-  - model: deepvo
-  - data: deepvo_kitti
-  - _self_
 
-# Overfit settings
+# Override experiment settings for overfitting
 name: "overfit_test" 
 max_epochs: 100
 learning_rate: 0.01
 batch_size: 1
+use_wandb: false
 
-# Single batch data
+# Override data settings for single batch
 data:
   sample_times: 1  # Minimal data
   train_sequences: ['00']  # Just one sequence
