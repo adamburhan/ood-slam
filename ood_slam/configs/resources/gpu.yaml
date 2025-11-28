@@ -17,9 +17,6 @@ hydra:
       mem: 64G
       ntasks_per_node: 1
 
-    # Force submitit to use the virtual environment python
-    python: ".venv/bin/python"
-
     ## A list of commands to add to the generated sbatch script before running srun:
     # setup:
     # - export LD_PRELOAD=/some/folder/with/libraries/
@@ -41,6 +38,3 @@ hydra:
           echo "Extraction complete. Available sequences:"
           ls -1 | grep "^[0-9][0-9]$"
         fi
-      - export PROJECT_ROOT="$PWD"
-      - export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
-      - source .venv/bin/activate
