@@ -4,7 +4,7 @@ from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
 
 # Import to trigger registration
-from ood_slam.utils.remote_launcher_plugin import RemoteSlurmQueueConf
+
 from ood_slam.utils.env_vars import get_constant
 from ood_slam.configs.config import Config
 
@@ -16,6 +16,7 @@ cs = ConfigStore.instance()
 cs.store(name="base_config", node=Config)
 
 def register_configs():
+    from ood_slam.utils.remote_launcher_plugin import RemoteSlurmQueueConf
     """Adds all configs to the Hydra Config store."""
      
     ConfigStore.instance().store(
