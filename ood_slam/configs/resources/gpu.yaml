@@ -45,6 +45,5 @@ hydra:
       - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/pose_GT $SLURM_TMPDIR/KITTI/
       - mkdir -p $SLURM_TMPDIR/KITTI/images
       - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/images/00.tar $SLURM_TMPDIR/KITTI/images
-      - cd $SLURM_TMPDIR/KITTI/images
-      - tar -xf 00.tar
-      - rm 00.tar
+      - tar -xf $SLURM_TMPDIR/KITTI/images/00.tar
+      - rm $SLURM_TMPDIR/KITTI/images/00.tar
