@@ -1,4 +1,7 @@
 # DeepVO KITTI Dataset Configuration
+defaults:
+  - _self_
+
 _target_: ood_slam.data.image_seq_datamodule.ImageSequenceDataModule
 
 # Use SLURM_TMPDIR when available (compute nodes), otherwise fallback to DATA_DIR
