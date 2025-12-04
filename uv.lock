@@ -2427,6 +2427,7 @@ wheels = [
 name = "ood-slam"
 source = { editable = "." }
 dependencies = [
+    { name = "cryptography" },
     { name = "datasets" },
     { name = "evaluate" },
     { name = "hydra-auto-schema" },
@@ -2459,6 +2460,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "cryptography", specifier = ">=46.0.3" },
     { name = "datasets", specifier = ">=2.21.0" },
     { name = "evaluate", specifier = ">=0.4.2" },
     { name = "hydra-auto-schema", specifier = ">=0.0.7" },
