@@ -27,6 +27,7 @@ dependencies = [
     "plotly>=6.5.0",
     "remote-slurm-executor",
     "cryptography>=46.0.3",
+    "pynacl>=1.6.1",
 ]
 
 [dependency-groups]
