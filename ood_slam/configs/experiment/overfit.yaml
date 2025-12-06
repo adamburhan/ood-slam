@@ -1,5 +1,8 @@
-# Overfitting experiment config
 # @package _global_
+
+defaults:
+  - override /data: deepvo_kitti.yaml
+  - override /model: deepvo.yaml
 
 # Override experiment settings for overfitting
 name: "overfit_test" 
