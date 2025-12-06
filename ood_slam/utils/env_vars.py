@@ -92,6 +92,8 @@ def get_constant(*names: str):
     """Resolver for Hydra to get the value of a constant in this file."""
     assert names
     for name in names:
+        # Convert to string in case we receive a Path object from nested interpolation
+        name = str(name)
         if name in globals():
             obj = globals()[name]
             if obj is None:
