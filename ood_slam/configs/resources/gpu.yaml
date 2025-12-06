@@ -48,3 +48,5 @@ hydra:
       - tar -xf $SLURM_TMPDIR/KITTI/images/00.tar -C $SLURM_TMPDIR/KITTI/images/
       - rm $SLURM_TMPDIR/KITTI/images/00.tar
       - export UV_CACHE_DIR="/scratch/adamb14/uv/cache"
+      - export UV_PROJECT_ENVIRONMENT=/scratch/adamb14/uv/envs/ood-slam-py310
+      - source "$UV_PROJECT_ENVIRONMENT/bin/activate"
