@@ -27,7 +27,7 @@ import wandb
     
 
 PROJECT_NAME = ood_slam.__name__
-REPO_ROOTDIR = Path(__file__).parent
+REPO_ROOTDIR = Path(__file__).parent.parent
 logger = logging.getLogger(__name__)
 
 # Configure auto schema plugin
