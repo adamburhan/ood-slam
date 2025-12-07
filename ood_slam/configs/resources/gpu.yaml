@@ -28,3 +28,4 @@ hydra:
       - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/images/00.tar $SLURM_TMPDIR/KITTI/images
       - tar -xf $SLURM_TMPDIR/KITTI/images/00.tar -C $SLURM_TMPDIR/KITTI/images/
       - rm $SLURM_TMPDIR/KITTI/images/00.tar
+      - module load httpproxy
