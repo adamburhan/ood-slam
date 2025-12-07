@@ -15,19 +15,6 @@ OmegaConf.register_new_resolver("get_constant", get_constant)
 cs = ConfigStore.instance()
 cs.store(name="base_config", node=Config)
 
-def register_configs():
-    from ood_slam.utils.remote_launcher_plugin import RemoteSlurmQueueConf
-    """Adds all configs to the Hydra Config store."""
-     
-    ConfigStore.instance().store(
-        group="hydra/launcher",
-        name="remote_submitit_slurm",
-        node=RemoteSlurmQueueConf,
-        provider="Mila",
-    )
-
-# # Auto-register when imported
-# register_configs()
 
 __all__ = [
     "Config",
