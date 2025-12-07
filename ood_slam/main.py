@@ -104,8 +104,11 @@ def main(cfg: DictConfig) -> None:
             tags=["ood-slam", cfg.model._target_.split('.')[-1] if hasattr(cfg.model, '_target_') else "model"],
         )
         
-        # Log the full config as an artifact
-        wandb.config.update(OmegaConf.to_container(cfg, resolve=True))
+        # Log the full config as an artifact (skip missing values marked with ???)
+        try:
+            wandb.config.update(OmegaConf.to_container(cfg, resolve=True, throw_on_missing=False))
+        except Exception as e:
+            log.warning(f"Could not update wandb config with full cfg: {e}")
         log.info(f"Wandb run: {wandb.run.name}")
     
     # Start training
