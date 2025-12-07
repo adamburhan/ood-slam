@@ -40,7 +40,7 @@ auto_schema_plugin.config = auto_schema_plugin.AutoSchemaPluginConfig(
     add_headers=False,  # don't fallback to adding headers if we can't use vscode settings file.
 )
 
-register_configs()
+#register_configs()
 
 # Set up logging
 logging.basicConfig(
