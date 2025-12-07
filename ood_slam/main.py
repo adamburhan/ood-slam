@@ -18,7 +18,7 @@ from rich.logging import RichHandler
 from hydra_plugins.auto_schema import auto_schema_plugin
 
 import ood_slam
-from ood_slam.configs import register_configs
+# from ood_slam.configs import register_configs
 
 from ood_slam.trainer import train
 
