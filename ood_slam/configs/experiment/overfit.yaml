@@ -7,7 +7,7 @@ defaults:
 # Override experiment settings for overfitting
 name: "overfit_test" 
 max_epochs: 100
-learning_rate: 0.01
+learning_rate: 0.001
 batch_size: 8
 #use_wandb: false
 
