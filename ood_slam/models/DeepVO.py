@@ -33,12 +33,14 @@ class DeepVO(BaseModel):
         rnn_dropout_between,
         rnn_dropout_out,
         pretrained_flownet=None,
+        pretrained_deepvo=None,
         batch_norm=True):
         super().__init__()
         # CNN
         self.batch_norm = batch_norm
         self.clip_grad_norm = clip  # Renamed for BaseModel compatibility
         self.pretrained_flownet = pretrained_flownet
+        self.pretrained_deepvo = pretrained_deepvo
         
         self.conv1   = conv(self.batch_norm,   6,   64, kernel_size=7, stride=2, dropout=conv_dropout[0])
         self.conv2   = conv(self.batch_norm,  64,  128, kernel_size=5, stride=2, dropout=conv_dropout[1])
@@ -97,8 +99,11 @@ class DeepVO(BaseModel):
                 m.bias.data.zero_()
         
         # Load pretrained FlowNet weights 
-        if self.pretrained_flownet is not None:
+        if self.pretrained_flownet is not None and self.pretrained_deepvo is None:
             self._load_pretrained_flownet(self.pretrained_flownet)
+        # Load pretrained DeepVO weights
+        if self.pretrained_deepvo is not None:
+            self._load_pretrained_deepvo(self.pretrained_deepvo)
     
     def _load_pretrained_flownet(self, pretrained_path: str):
         """
@@ -152,6 +157,40 @@ class DeepVO(BaseModel):
         except Exception as e:
             print(f"Error loading pretrained FlowNet weights: {e}")
     
+    def _load_pretrained_deepvo(self, pretrained_path: str):
+        """
+        Load DeepVO pretrained weights for the entire model.
+        
+        Args:
+            pretrained_path: Path to the pretrained DeepVO model
+        """
+        import os
+        if not os.path.exists(pretrained_path):
+            print(f"Warning: Pretrained DeepVO model not found at {pretrained_path}")
+            return
+            
+        try:
+            # Load pretrained weights
+            device = next(self.parameters()).device
+            if device.type == 'cuda':
+                pretrained_w = torch.load(pretrained_path)
+            else:
+                pretrained_w = torch.load(pretrained_path, map_location='cpu')
+            
+            print(f"Loading DeepVO pretrained model from {pretrained_path}")
+            
+            # Load the entire state dict
+            if 'state_dict' in pretrained_w:
+                pretrained_dict = pretrained_w['state_dict']
+            else:
+                pretrained_dict = pretrained_w
+            
+            self.load_state_dict(pretrained_dict)
+            print("Successfully loaded pretrained DeepVO model")
+                
+        except Exception as e:
+            print(f"Error loading pretrained DeepVO weights: {e}")
+
     def forward(self, x):
         # x: (batch, seq_len, channel, width, height)
         # stack consecutive image pairs
