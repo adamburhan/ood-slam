@@ -19,6 +19,7 @@ from hydra_plugins.auto_schema import auto_schema_plugin
 
 import ood_slam
 from ood_slam import configs  # Import to trigger config registration
+from ood_slam.utils import remote_launcher_plugin  # Import to register patched launcher
 
 from ood_slam.trainer import train
 
