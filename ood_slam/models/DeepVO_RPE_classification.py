@@ -52,7 +52,7 @@ class DeepVOErrorClassification(BaseModel):
         self.conv6   = conv(self.batch_norm, 512, 1024, kernel_size=3, stride=2, dropout=conv_dropout[8])
         # Get the shape based on different image sizes
         with torch.no_grad():
-            tmp = torch.zeros(1, 6, img_h, img_w, device=self.conv1.weight.device)
+            tmp = torch.zeros(1, 6, img_h, img_w, device=self.conv1[0].weight.device)
             tmp = self.encode_image(tmp)
             cnn_dim = tmp.view(1, -1).size(1)
         

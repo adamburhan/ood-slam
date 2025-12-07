@@ -2,8 +2,10 @@
 defaults:
   - mila.yaml
 
+# Narval-specific overrides
 hydra:
   launcher:
-    executor:
-      cluster_hostname: narval
-      internet_access_on_compute_nodes: false
+    # Narval has no internet access on compute nodes
+    # Add any Narval-specific SLURM parameters here
+    additional_parameters:
+      account: rrg-lpaull
