@@ -15,64 +15,78 @@ def get_data_info(folder_list, seq_len_range, overlap, sample_times=1,
                   data_dir=None, error_dir=None, image_dir=None, pad_y=False, shuffle=False, sort=True):
     X_path, Y_trans, Y_rot = [], [], []
     X_len = []
+
+    assert seq_len_range[0] == seq_len_range[1], "Only fixed sequence lengths are supported for now."
+    seq_len = seq_len_range[0]
+
     for folder in folder_list:
         start_t = time.time()
-        errors_trans = np.load('{}{}_trans.npy'.format(error_dir, folder))  # (n_images, 1)
-        errors_rot = np.load('{}{}_rot.npy'.format(error_dir, folder))  # (n_images, 1)
+
+        # Load error magnitudes
+        errors_df = pd.read_csv(f'{error_dir}/{folder}_rpe_labels.csv')
+        errors_trans = errors_df['rpe_translation'].to_numpy()  # (n_images-1, )
+        errors_rot = errors_df['rpe_rotation'].to_numpy()  # (n_images-1, )
+
+        # Load image paths
         fpaths = glob.glob('{}{}/*.png'.format(image_dir, folder))
         fpaths.sort()
-        # Fixed seq_len
-        if seq_len_range[0] == seq_len_range[1]:
-            if sample_times > 1:
-                sample_interval = int(np.ceil(seq_len_range[0] / sample_times))
-                start_frames = list(range(0, seq_len_range[0], sample_interval))
-                print('Sample start from frame {}'.format(start_frames))
-            else:
-                start_frames = [0]
+        n_images = len(fpaths)
+        
+        # sanity check
+        if len(errors_trans) == n_images - 1:
+            # Pad a dummy at the beggining so that:
+            # error[t] = RPE between frame t-1 and t, t >= 1
+            # error[0] = -1 (invalid value)
+            errors_trans = np.insert(errors_trans, 0, -1)
+            errors_rot = np.insert(errors_rot, 0, -1)
+        elif len(errors_trans) != n_images:
+            raise ValueError(
+                f"Unexpected length mismatch in folder {folder}: "
+                f"{len(errors_trans)=} vs {n_images=} images"
+            )
+        
+        if sample_times > 1:
+            sample_interval = int(np.ceil(seq_len_range[0] / sample_times))
+            start_frames = list(range(0, seq_len_range[0], sample_interval))
+            print('Sample start from frame {}'.format(start_frames))
+        else:
+            start_frames = [0]
 
-            for st in start_frames:
-                seq_len = seq_len_range[0]
-                n_frames = len(fpaths) - st
-                jump = seq_len - overlap
-                res = n_frames % seq_len
-                if res != 0:
-                    n_frames = n_frames - res
-                x_segs = [fpaths[i:i+seq_len] for i in range(st, n_frames, jump)]
-                y_segs_trans = [errors_trans[i:i+seq_len] for i in range(st, n_frames, jump)]
-                y_segs_rot = [errors_rot[i:i+seq_len] for i in range(st, n_frames, jump)]
-                Y_trans += y_segs_trans
-                Y_rot += y_segs_rot
-                X_path += x_segs
-                X_len += [len(xs) for xs in x_segs]
-        # # Random segment to sequences with diff lengths
-        # else:
-        #     assert(overlap < min(seq_len_range))
-        #     n_frames = len(fpaths)
-        #     min_len, max_len = seq_len_range[0], seq_len_range[1]
-        #     for i in range(sample_times):
-        #         start = 0
-        #         while True:
-        #             n = np.random.random_integers(min_len, max_len)
-        #             if start + n < n_frames:
-        #                 x_seg = fpaths[start:start+n] 
-        #                 X_path.append(x_seg)
-        #                 if not pad_y:
-        #                     Y_trans.append(errors_trans[start:start+n])
-        #                     Y_rot.append(errors_rot[start:start+n])
-        #                 else:
-        #                     pad_zero = np.zeros((max_len-n, 15))
-        #                     padded = np.concatenate((poses[start:start+n], pad_zero))
-        #                     Y.append(padded.tolist())
-        #             else:
-        #                 print('Last %d frames is not used' %(start+n-n_frames))
-        #                 break
-        #             start += n - overlap
-        #             X_len.append(len(x_seg))
+        for st in start_frames:
+            n_frames = len(fpaths) - st
+            jump = seq_len - overlap
+            res = n_frames % seq_len
+            if res != 0:
+                n_frames = n_frames - res
+
+            for i in range(st, st + n_frames, jump):
+                x_seg = fpaths[i : i + seq_len]
+                trans_seg = errors_trans[i : i + seq_len]
+                rot_seg = errors_rot[i : i + seq_len]
+
+                # sanity check lengths
+                if len(x_seg) != seq_len or len(trans_seg) != seq_len:
+                    continue
+
+                # We will use indices 1...seq_len-1 for the loss (because of y[:,1:])
+                # so require those to be valid (not -1)
+                if np.any(trans_seg[1:] < 0) or np.any(rot_seg[1:] < 0):
+                    continue
+            
+                X_path.append(x_seg)
+                Y_trans.append(trans_seg)
+                Y_rot.append(rot_seg)
+                X_len.append(len(x_seg))
         print('Folder {} finish in {} sec'.format(folder, time.time()-start_t))
     
     # Convert to pandas dataframes
-    data = {'seq_len': X_len, 'image_path': X_path, 'pose': Y}
-    df = pd.DataFrame(data, columns = ['seq_len', 'image_path', 'pose'])
+    data = {
+        'seq_len': X_len, 
+        'image_path': X_path, 
+        'rpe_translation': Y_trans, 
+        'rpe_rotation': Y_rot
+    }
+    df = pd.DataFrame(data, columns = ['seq_len', 'image_path', 'rpe_translation', 'rpe_rotation'])
     # Shuffle through all videos
     if shuffle:
         df = df.sample(frac=1)
@@ -115,7 +129,7 @@ class SortedRandomBatchSampler(Sampler):
     def __len__(self):
         return self.len
     
-class ImageSequenceDataset(Dataset):
+class ImageSeqErrorRegDataset(Dataset):
     def __init__(
         self,
         info_dataframe,
@@ -140,34 +154,11 @@ class ImageSequenceDataset(Dataset):
         self.data_info = info_dataframe
         self.seq_len_list = list(self.data_info.seq_len)
         self.image_arr = np.asarray(self.data_info.image_path)
-        self.groundtruth_arr = np.asarray(self.data_info.pose)
+        self.trans_arr = np.asarray(self.data_info.rpe_translation)
+        self.rot_arr = np.asarray(self.data_info.rpe_rotation)
         
     def __getitem__(self, index):
-        raw_groundtruth = np.hsplit(self.groundtruth_arr[index], np.array([6]))	
-        groundtruth_sequence = raw_groundtruth[0]
-        groundtruth_rotation = raw_groundtruth[1][0].reshape((3, 3)).T # opposite rotation of the first frame
-        groundtruth_sequence = torch.FloatTensor(groundtruth_sequence)
-        # groundtruth_sequence[1:] = groundtruth_sequence[1:] - groundtruth_sequence[0:-1]  # get relative pose w.r.t. previois frame 
-
-        groundtruth_sequence[1:] = groundtruth_sequence[1:] - groundtruth_sequence[0] # get relative pose w.r.t. the first frame in the sequence 
-		
-        # print('Item before transform: ' + str(index) + '   ' + str(groundtruth_sequence))
-
-        # here we rotate the sequence relative to the first frame
-        for gt_seq in groundtruth_sequence[1:]:
-            location = torch.FloatTensor(groundtruth_rotation.dot(gt_seq[3:].numpy()))
-            gt_seq[3:] = location[:]
-            # print(location)
-
-        # get relative pose w.r.t. previous frame
-        groundtruth_sequence[2:] = groundtruth_sequence[2:] - groundtruth_sequence[1:-1]
-
-		# here we consider cases when rotation angles over Y axis go through PI -PI discontinuity
-        for gt_seq in groundtruth_sequence[1:]:
-            gt_seq[0] = normalize_angle_delta(gt_seq[0])
-			
-        # print('Item after transform: ' + str(index) + '   ' + str(groundtruth_sequence))
-
+        # load images
         image_path_sequence = self.image_arr[index]
         sequence_len = torch.tensor(self.seq_len_list[index])  #sequence_len = torch.tensor(len(image_path_sequence))
         
@@ -181,7 +172,16 @@ class ImageSequenceDataset(Dataset):
             img_as_tensor = img_as_tensor.unsqueeze(0)
             image_sequence.append(img_as_tensor)
         image_sequence = torch.cat(image_sequence, 0)
-        return (sequence_len, image_sequence, groundtruth_sequence)
+
+        # load rpes
+        trans_seq = self.trans_arr[index]
+        rot_seq = self.rot_arr[index]
+
+        # Make them (T, 1) float tensors
+        trans_seq = torch.as_tensor(trans_seq, dtype=torch.float32).unsqueeze(-1)
+        rot_seq   = torch.as_tensor(rot_seq, dtype=torch.float32).unsqueeze(-1)
+
+        return (sequence_len, image_sequence, trans_seq, rot_seq)
 
     def __len__(self):
         return len(self.data_info.index)

@@ -44,6 +44,7 @@ hydra:
       - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/flownets_EPE1.951.pth $SLURM_TMPDIR/KITTI/
       - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/t000102050809_v04060710_im184x608_s5x7_b8_rnn1000_optAdagrad_lr0.0005.model.train $SLURM_TMPDIR/KITTI/
       - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/pose_GT $SLURM_TMPDIR/KITTI/
+      - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/errors $SLURM_TMPDIR/KITTI/
       - mkdir -p $SLURM_TMPDIR/KITTI/images
       - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/images/04.tar $SLURM_TMPDIR/KITTI/images
       - tar -xf $SLURM_TMPDIR/KITTI/images/04.tar -C $SLURM_TMPDIR/KITTI/images/
