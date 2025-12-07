@@ -14,7 +14,7 @@ batch_size: 8
 # Override data settings for single batch
 data:
   sample_times: 1  # Minimal data
-  train_sequences: ['04']  # Just one sequence
-  valid_sequences: ['04']  # Same as train for overfitting
+  #train_sequences: ['04']  # Just one sequence
+  #valid_sequences: ['04']  # Same as train for overfitting
   use_cache: false  # Don't cache this tiny dataset
-  overfit: true  # Enable overfitting mode in data module
+  overfit: false  # Enable overfitting mode in data module
