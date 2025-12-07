@@ -21,32 +21,32 @@ hydra:
     # setup:
     # - export LD_PRELOAD=/some/folder/with/libraries/
 
-    # setup:
-    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/ $SLURM_TMPDIR/KITTI/
-    #   - |
-    #     # Extract tar files in images directory  
-    #     IMAGES_DIR="$SLURM_TMPDIR/KITTI/images"
-    #     if [ -d "$IMAGES_DIR" ]; then
-    #       cd "$IMAGES_DIR"
-    #       echo "Extracting sequence tar files..."
-    #       for tar_file in *.tar; do
-    #         if [ -f "$tar_file" ]; then
-    #           echo "Extracting $tar_file"
-    #           tar -xf "$tar_file"
-    #           rm "$tar_file"  # Save space on compute node
-    #         fi
-    #       done
-    #       echo "Extraction complete. Available sequences:"
-    #       ls -1 | grep "^[0-9][0-9]$"
-    #     fi
-
     setup:
-      - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/flownets_EPE1.951.pth $SLURM_TMPDIR/KITTI/
-      - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/t000102050809_v04060710_im184x608_s5x7_b8_rnn1000_optAdagrad_lr0.0005.model.train $SLURM_TMPDIR/KITTI/
-      - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/pose_GT $SLURM_TMPDIR/KITTI/
-      - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/errors $SLURM_TMPDIR/KITTI/
-      - mkdir -p $SLURM_TMPDIR/KITTI/images
-      - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/images/04.tar $SLURM_TMPDIR/KITTI/images
-      - tar -xf $SLURM_TMPDIR/KITTI/images/04.tar -C $SLURM_TMPDIR/KITTI/images/
-      - rm $SLURM_TMPDIR/KITTI/images/04.tar
+      - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/ $SLURM_TMPDIR/KITTI/
+      - |
+        # Extract tar files in images directory  
+        IMAGES_DIR="$SLURM_TMPDIR/KITTI/images"
+        if [ -d "$IMAGES_DIR" ]; then
+          echo "Extracting sequence tar files..."
+          for tar_file in *.tar; do
+            if [ -f "$tar_file" ]; then
+              echo "Extracting $tar_file"
+              tar -xf "$tar_file" -C $SLURM_TMPDIR/KITTI/images/
+              rm "$tar_file"  # Save space on compute node
+            fi
+          done
+          echo "Extraction complete. Available sequences:"
+          ls -1 | grep "^[0-9][0-9]$"
+        fi
       - module load httpproxy
+
+    # setup:
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/flownets_EPE1.951.pth $SLURM_TMPDIR/KITTI/
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/t000102050809_v04060710_im184x608_s5x7_b8_rnn1000_optAdagrad_lr0.0005.model.train $SLURM_TMPDIR/KITTI/
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/pose_GT $SLURM_TMPDIR/KITTI/
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/errors $SLURM_TMPDIR/KITTI/
+    #   - mkdir -p $SLURM_TMPDIR/KITTI/images
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/images/04.tar $SLURM_TMPDIR/KITTI/images
+    #   - tar -xf $SLURM_TMPDIR/KITTI/images/04.tar -C $SLURM_TMPDIR/KITTI/images/
+    #   - rm $SLURM_TMPDIR/KITTI/images/04.tar
+    #   - module load httpproxy
