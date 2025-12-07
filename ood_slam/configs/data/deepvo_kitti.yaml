@@ -30,3 +30,5 @@ pin_memory: true
 # Caching settings
 use_cache: true
 cache_dir: null  # Will use default: {data_dir}/datainfo
+
+overfit: false

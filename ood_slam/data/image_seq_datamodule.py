@@ -23,7 +23,8 @@ class ImageSequenceDataModule:
         resize_mode: str = "rescale",
         minus_point_5: bool = True,
         use_cache: bool = True,
-        cache_dir: str = None
+        cache_dir: str = None,
+        overfit: bool = False,
     ):
         self.data_dir = data_dir
         self.train_sequences = train_sequences
@@ -40,6 +41,7 @@ class ImageSequenceDataModule:
         self.resize_mode = resize_mode
         self.minus_point_5 = minus_point_5
         self.use_cache = use_cache
+        self.overfit = overfit
         
         # Set up cache directory like original
         if cache_dir is None:
@@ -103,6 +105,12 @@ class ImageSequenceDataModule:
                 self.train_df.to_pickle(self.train_cache_path)
                 self.valid_df.to_pickle(self.valid_cache_path)
         
+        if self.overfit:
+            # Reduce to just one batch for overfitting
+            self.train_df = self.train_df.iloc[:self.batch_size]
+            self.valid_df = self.train_df.copy()
+            print('Overfitting mode: using only one batch of data')
+
         # Create datasets
         self.train_dataset = ImageSequenceDataset(
             self.train_df, 
