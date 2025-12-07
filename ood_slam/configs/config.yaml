@@ -29,3 +29,4 @@ wandb:
   name: "${name}_${now:%Y%m%d_%H%M%S}"
 
 # debug: false
+checkpoint_dir: "${hydra:runtime.output_dir}/checkpoints"

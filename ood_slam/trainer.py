@@ -109,6 +109,7 @@ def train(model, train_dl, val_dl, device, config):
         if current_val_loss < best_val_loss:
             best_val_loss = current_val_loss
             # TODO: Save checkpoint
+            torch.save(model.state_dict(), os.path.join(config.get('checkpoint_dir', '.'), 'best_model.pth'))
             logger.info(f"New best validation loss: {best_val_loss:.4f}")
     
     return {"train": dict(train_metrics), "val": dict(val_metrics)}
