@@ -23,9 +23,9 @@ defaults:
 # # slurm_tmpdir: "${get_constant:SLURM_TMPDIR}"
 
 # # Logging and tracking
-# use_wandb: true
-# wandb:
-#   project: "ood-slam"
-#   name: "${experiment_name}_${now:%Y%m%d_%H%M%S}"
+use_wandb: true
+wandb:
+  project: "ood-slam"
+  name: "${name}_${now:%Y%m%d_%H%M%S}"
 
 # debug: false
