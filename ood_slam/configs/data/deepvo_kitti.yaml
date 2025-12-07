@@ -19,8 +19,8 @@ resize_mode: "rescale"
 minus_point_5: true
 
 # Sequence parameters
-seq_len: [5, 7]
-sample_times: 3
+seq_len: [5, 5]
+sample_times: 1
 
 # DataLoader settings
 batch_size: ${batch_size}  # Reference from main config
