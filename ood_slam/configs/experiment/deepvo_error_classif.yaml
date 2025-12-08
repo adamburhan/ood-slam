@@ -7,7 +7,8 @@ defaults:
 # Override experiment settings for overfitting
 name: "deepvo_error_classif" 
 max_epochs: 100
-learning_rate: 0.001
+learning_rate: 0.0005
+optimizer: "Adagrad"
 batch_size: 8
 #use_wandb: false
 

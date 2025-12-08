@@ -46,7 +46,13 @@ def train(model, train_dl, val_dl, device, config):
     """
     # Setup
     epochs = config.max_epochs
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
+
+    if config.optimizer == "Adam":
+        optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
+    elif config.optimizer == "Adagrad":
+        optimizer = torch.optim.Adagrad(model.parameters(), lr=config.learning_rate)
+    else:
+        raise ValueError(f"Unsupported optimizer: {config.optimizer}")
     
     model.to(device)
     
