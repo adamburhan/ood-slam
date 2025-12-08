@@ -108,9 +108,15 @@ def train(model, train_dl, val_dl, device, config):
         current_val_loss = avg_val_metrics.get('val_loss', float('inf'))
         if current_val_loss < best_val_loss:
             best_val_loss = current_val_loss
-            # TODO: Save checkpoint
-            torch.save(model.state_dict(), os.path.join(config.get('checkpoint_dir', '.'), 'best_model.pth'))
-            logger.info(f"New best validation loss: {best_val_loss:.4f}")
+            try:
+                checkpoint_dir = config.get('checkpoint_dir', '.')
+                os.makedirs(checkpoint_dir, exist_ok=True)
+                checkpoint_path = os.path.join(checkpoint_dir, 'best_model.pth')
+                torch.save(model.state_dict(), checkpoint_path)
+                logger.info(f"New best validation loss: {best_val_loss:.4f} - saved to {checkpoint_path}")
+            except Exception as e:
+                logger.error(f"Failed to save checkpoint: {e}")
+                # Continue training even if checkpoint fails
     
     return {"train": dict(train_metrics), "val": dict(val_metrics)}
             
