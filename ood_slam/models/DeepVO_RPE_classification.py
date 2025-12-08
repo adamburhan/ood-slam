@@ -293,7 +293,7 @@ class DeepVOErrorClassification(BaseModel):
             # Compute loss
             translation_loss = torch.nn.functional.cross_entropy(trans_logits_flat, y_trans_flat)
             angle_loss = torch.nn.functional.cross_entropy(rot_logits_flat, y_rot_flat)
-            loss = (100 * angle_loss + translation_loss)
+            loss = (angle_loss + translation_loss)
             
             # Compute accuracies
             trans_pred = trans_logits_flat.argmax(dim=1)
