@@ -173,3 +173,4 @@ tests/.regression_files/**.png
 tests/.regression_files/**/*.gif
 ood-slam/.schemas
 ood_slam/.schemas
+notebooks

@@ -114,7 +114,7 @@ class ImageSequenceErrorDataModule:
         self.train_dataset = ImageSequenceErrorDataset(
             self.train_df, 
             resize_mode=self.resize_mode,
-            new_size=(self.img_h, self.img_w),  
+            new_size=(self.img_w, self.img_h),  
             img_mean=self.img_means, 
             img_std=self.img_stds, 
             minus_point_5=self.minus_point_5
@@ -123,7 +123,7 @@ class ImageSequenceErrorDataModule:
         self.valid_dataset = ImageSequenceErrorDataset(
             self.valid_df, 
             resize_mode=self.resize_mode,
-            new_size=(self.img_h, self.img_w),
+            new_size=(self.img_w, self.img_h),
             img_mean=self.img_means, 
             img_std=self.img_stds, 
             minus_point_5=self.minus_point_5

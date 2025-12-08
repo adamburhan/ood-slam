@@ -28,6 +28,7 @@ dependencies = [
     "remote-slurm-executor",
     "cryptography>=46.0.3",
     "pynacl>=1.6.1",
+    "ipykernel>=7.1.0",
 ]
 
 [dependency-groups]
