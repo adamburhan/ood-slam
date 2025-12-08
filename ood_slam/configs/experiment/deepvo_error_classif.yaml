@@ -1,0 +1,20 @@
+# @package _global_
+
+defaults:
+  - override /data: deepvo_kitti_error_classif.yaml
+  - override /model: deepvo_error_classif.yaml
+
+# Override experiment settings for overfitting
+name: "deepvo_error_classif" 
+max_epochs: 100
+learning_rate: 0.001
+batch_size: 8
+#use_wandb: false
+
+# Override data settings for single batch
+data:
+  sample_times: 1  # Minimal data
+  #train_sequences: ['04']  # Just one sequence
+  #valid_sequences: ['04']  # Same as train for overfitting
+  use_cache: false  # Don't cache this tiny dataset
+  overfit: false  # Enable overfitting mode in data module
