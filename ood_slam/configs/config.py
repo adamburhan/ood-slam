@@ -17,6 +17,8 @@ class Config:
     preprocessing: Any
     
     experiment: Any
+
+    optimizer: str = "Adam"
     
     # Experiment settings
     name: str = "default"
