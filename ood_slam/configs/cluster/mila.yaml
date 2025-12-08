@@ -8,9 +8,9 @@ hydra:
   mode: MULTIRUN
   run:
     # output directory, generated dynamically on each run
-    dir: ${get_constant:SCRATCH}/ood_slam/logs/${name}/runs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    dir: logs/${name}/runs/${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
-    dir: ${get_constant:SCRATCH}/ood_slam/logs/${name}/multiruns
+    dir: logs/${name}/multiruns
     subdir: ${hydra.job.id}
 
   launcher:
