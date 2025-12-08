@@ -47,6 +47,8 @@ def train(model, train_dl, val_dl, device, config):
     # Setup
     epochs = config.max_epochs
 
+    model.to(device)
+    
     if config.optimizer == "Adam":
         optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
     elif config.optimizer == "Adagrad":
@@ -54,7 +56,6 @@ def train(model, train_dl, val_dl, device, config):
     else:
         raise ValueError(f"Unsupported optimizer: {config.optimizer}")
     
-    model.to(device)
     
     use_wandb = getattr(config, 'use_wandb', False)
     if use_wandb:
