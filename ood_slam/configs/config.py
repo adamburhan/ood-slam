@@ -28,6 +28,7 @@ class Config:
     # Environment variables
     scratch_dir: str = "${get_constant:SCRATCH}"
     slurm_tmpdir: str = "${get_constant:SLURM_TMPDIR}"
+    checkpoint_dir: str = "./checkpoints" 
     
     # Wandb settings
     use_wandb: bool = True
