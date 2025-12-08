@@ -34,12 +34,14 @@ class DeepVOErrorClassification(BaseModel):
         rnn_dropout_out,
         num_classes,
         pretrained_flownet=None,
+        pretrained_deepvo=None,
         batch_norm=True):
         super().__init__()
         # CNN
         self.batch_norm = batch_norm
         self.clip_grad_norm = clip  # Renamed for BaseModel compatibility
         self.pretrained_flownet = pretrained_flownet
+        self.pretrained_deepvo = pretrained_deepvo
         
         self.conv1   = conv(self.batch_norm,   6,   64, kernel_size=7, stride=2, dropout=conv_dropout[0])
         self.conv2   = conv(self.batch_norm,  64,  128, kernel_size=5, stride=2, dropout=conv_dropout[1])
@@ -100,8 +102,11 @@ class DeepVOErrorClassification(BaseModel):
                 m.bias.data.zero_()
         
         # Load pretrained FlowNet weights 
-        if self.pretrained_flownet is not None:
+        if self.pretrained_flownet is not None and self.pretrained_deepvo is None:
             self._load_pretrained_flownet(self.pretrained_flownet)
+        # Load pretrained DeepVO weights
+        if self.pretrained_deepvo is not None:
+            self._load_pretrained_deepvo(self.pretrained_deepvo)
     
     def _load_pretrained_flownet(self, pretrained_path: str):
         """
@@ -154,6 +159,58 @@ class DeepVOErrorClassification(BaseModel):
                 
         except Exception as e:
             print(f"Error loading pretrained FlowNet weights: {e}")
+
+    def _load_pretrained_deepvo(self, pretrained_path: str):
+        """
+        Load pretrained DeepVO weights for the entire model.
+        
+        Args:
+            pretrained_path: Path to the pretrained DeepVO model
+        """
+        import os
+        if not os.path.exists(pretrained_path):
+            print(f"Warning: Pretrained DeepVO model not found at {pretrained_path}")
+            return
+            
+        try:
+            # Load pretrained weights
+            device = next(self.parameters()).device
+            if device.type == 'cuda':
+                pretrained_w = torch.load(pretrained_path)
+            else:
+                pretrained_w = torch.load(pretrained_path, map_location='cpu')
+            
+            print(f"Loading DeepVO pretrained model from {pretrained_path}")
+            
+            # Load the entire state dict
+            model_dict = self.state_dict()
+            
+            # Filter pretrained weights to match DeepVO layers
+            if 'state_dict' in pretrained_w:
+                pretrained_dict = pretrained_w['state_dict']
+            else:
+                pretrained_dict = pretrained_w
+                
+            # Only update layers that exist in both models
+            update_dict = {}
+            for k, v in pretrained_dict.items():
+                if k in model_dict:
+                    # Check if shapes match
+                    if v.shape == model_dict[k].shape:
+                        update_dict[k] = v
+                        print(f"  Loading: {k} {v.shape}")
+                    else:
+                        print(f"  Skipping {k}: shape mismatch {v.shape} vs {model_dict[k].shape}")
+            
+            if update_dict:
+                model_dict.update(update_dict)
+                self.load_state_dict(model_dict)
+                print(f"Successfully loaded {len(update_dict)} layers from pretrained DeepVO")
+            else:
+                print("Warning: No matching layers found in pretrained model")
+                
+        except Exception as e:
+            print(f"Error loading pretrained DeepVO weights: {e}")
     
     def forward(self, x):
         # x: (batch, seq_len, channel, width, height)
@@ -197,8 +254,8 @@ class DeepVOErrorClassification(BaseModel):
         # trans_logits, rot_logits: (batch, seq-1, num_classes)
         
         # we want labels for pairs (f0, f1), ..., (f_{T-2}, f_{T-1})
-        y_trans_class = y_trans_class[:, :-1]  
-        y_rot_class = y_rot_class[:, :-1]      
+        y_trans_class = y_trans_class[:, 1:]  
+        y_rot_class = y_rot_class[:, 1:]      
         
         # Reshape for cross_entropy: (batch*seq, num_classes) and (batch*seq,)
         batch_size, seq_len, num_classes = trans_logits.shape
@@ -214,3 +271,61 @@ class DeepVOErrorClassification(BaseModel):
         # Weight angle loss higher (common in VO tasks)
         loss = (100 * angle_loss + translation_loss)
         return loss
+    
+    def validation_step(self, batch: Tuple[Any, ...]) -> Dict[str, float]:
+        """Validation step that computes loss and accuracy metrics."""
+        _, x, y_trans_class, y_rot_class = batch
+        
+        with torch.no_grad():
+            trans_logits, rot_logits = self.forward(x)
+            
+            # Align sequences
+            y_trans_class = y_trans_class[:, 1:]
+            y_rot_class = y_rot_class[:, 1:]
+            
+            # Flatten
+            batch_size, seq_len, num_classes = trans_logits.shape
+            trans_logits_flat = trans_logits.reshape(-1, num_classes)
+            rot_logits_flat = rot_logits.reshape(-1, num_classes)
+            y_trans_flat = y_trans_class.reshape(-1).long()
+            y_rot_flat = y_rot_class.reshape(-1).long()
+            
+            # Compute loss
+            translation_loss = torch.nn.functional.cross_entropy(trans_logits_flat, y_trans_flat)
+            angle_loss = torch.nn.functional.cross_entropy(rot_logits_flat, y_rot_flat)
+            loss = (100 * angle_loss + translation_loss)
+            
+            # Compute accuracies
+            trans_pred = trans_logits_flat.argmax(dim=1)
+            rot_pred = rot_logits_flat.argmax(dim=1)
+            
+            trans_acc = (trans_pred == y_trans_flat).float().mean()
+            rot_acc = (rot_pred == y_rot_flat).float().mean()
+            
+            # Per-class accuracy
+            trans_per_class_acc = []
+            rot_per_class_acc = []
+            for c in range(num_classes):
+                mask_trans = y_trans_flat == c
+                if mask_trans.sum() > 0:
+                    trans_per_class_acc.append((trans_pred[mask_trans] == c).float().mean().item())
+                
+                mask_rot = y_rot_flat == c
+                if mask_rot.sum() > 0:
+                    rot_per_class_acc.append((rot_pred[mask_rot] == c).float().mean().item())
+            
+            metrics = {
+                'val_loss': loss.item(),
+                'val_trans_loss': translation_loss.item(),
+                'val_rot_loss': angle_loss.item(),
+                'val_trans_acc': trans_acc.item(),
+                'val_rot_acc': rot_acc.item(),
+            }
+            
+            # Add per-class accuracies
+            for i, acc in enumerate(trans_per_class_acc):
+                metrics[f'val_trans_acc_class_{i}'] = acc
+            for i, acc in enumerate(rot_per_class_acc):
+                metrics[f'val_rot_acc_class_{i}'] = acc
+            
+            return metrics

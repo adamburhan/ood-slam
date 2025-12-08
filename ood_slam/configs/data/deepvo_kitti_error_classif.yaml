@@ -1,0 +1,4 @@
+defaults:
+  - deepvo_error_reg.yaml
+
+task: "classification"

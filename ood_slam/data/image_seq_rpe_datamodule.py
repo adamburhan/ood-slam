@@ -2,10 +2,10 @@ import torch
 from torch.utils.data import DataLoader
 import pandas as pd
 import os
-from ood_slam.data.image_seq_rpe_dataset import SortedRandomBatchSampler, ImageSeqErrorRegDataset, get_data_info
+from ood_slam.data.image_seq_rpe_dataset import SortedRandomBatchSampler, ImageSequenceErrorDataset, get_data_info
 
 
-class ImageSeqErrorRegDataModule:
+class ImageSequenceErrorDataModule:
     def __init__(
         self,
         data_dir: str,
@@ -25,6 +25,7 @@ class ImageSeqErrorRegDataModule:
         use_cache: bool = True,
         cache_dir: str = None,
         overfit: bool = False,
+        task: str = "regression",
     ):
         self.data_dir = data_dir
         self.train_sequences = train_sequences
@@ -42,6 +43,7 @@ class ImageSeqErrorRegDataModule:
         self.minus_point_5 = minus_point_5
         self.use_cache = use_cache
         self.overfit = overfit
+        self.task = task
         
         # Set up cache directory like original
         if cache_dir is None:
@@ -53,16 +55,11 @@ class ImageSeqErrorRegDataModule:
         os.makedirs(self.cache_dir, exist_ok=True)
         
         # Generate cache file paths like original
-        self.train_cache_path = os.path.join(
-            self.cache_dir,
-            f'train_df_t{"".join(self.train_sequences)}_v{"".join(self.valid_sequences)}_seq{self.seq_len[0]}x{self.seq_len[1]}_sample{self.sample_times}.pickle'
-        )
-        
-        self.valid_cache_path = os.path.join(
-            self.cache_dir,
-            f'valid_df_t{"".join(self.train_sequences)}_v{"".join(self.valid_sequences)}_seq{self.seq_len[0]}x{self.seq_len[1]}_sample{self.sample_times}.pickle'
-        )
-        
+        suffix = f't{"".join(self.train_sequences)}_v{"".join(self.valid_sequences)}_' \
+         f'seq{self.seq_len[0]}x{self.seq_len[1]}_sample{self.sample_times}_task{self.task}.pickle'
+
+        self.train_cache_path = os.path.join(self.cache_dir, f'train_df_{suffix}')
+        self.valid_cache_path = os.path.join(self.cache_dir, f'valid_df_{suffix}')
     
     def setup(self):
         """Set up datasets - loads or creates data info like original DeepVO."""
@@ -85,6 +82,7 @@ class ImageSeqErrorRegDataModule:
                 data_dir=self.data_dir,
                 error_dir=f"{self.data_dir}/errors/",  
                 image_dir=f"{self.data_dir}/images/",   
+                label_mode=self.task,
                 sort=True
             )
             
@@ -97,6 +95,7 @@ class ImageSeqErrorRegDataModule:
                 data_dir=self.data_dir,
                 error_dir=f"{self.data_dir}/errors/",
                 image_dir=f"{self.data_dir}/images/",
+                label_mode=self.task,
                 sort=True
             )
             
@@ -112,7 +111,7 @@ class ImageSeqErrorRegDataModule:
             print('Overfitting mode: using only one batch of data')
 
         # Create datasets
-        self.train_dataset = ImageSeqErrorRegDataset(
+        self.train_dataset = ImageSequenceErrorDataset(
             self.train_df, 
             resize_mode=self.resize_mode,
             new_size=(self.img_h, self.img_w),  
@@ -121,7 +120,7 @@ class ImageSeqErrorRegDataModule:
             minus_point_5=self.minus_point_5
         )
         
-        self.valid_dataset = ImageSeqErrorRegDataset(
+        self.valid_dataset = ImageSequenceErrorDataset(
             self.valid_df, 
             resize_mode=self.resize_mode,
             new_size=(self.img_h, self.img_w),

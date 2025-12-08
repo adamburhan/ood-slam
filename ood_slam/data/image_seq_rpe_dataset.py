@@ -11,8 +11,18 @@ import time
 from ood_slam.data.utils import normalize_angle_delta
 
 
-def get_data_info(folder_list, seq_len_range, overlap, sample_times=1, 
-                  data_dir=None, error_dir=None, image_dir=None, pad_y=False, shuffle=False, sort=True):
+def get_data_info(
+    folder_list, 
+    seq_len_range, 
+    overlap, 
+    sample_times=1, 
+    data_dir=None, 
+    error_dir=None, 
+    image_dir=None, 
+    label_mode="regression", 
+    shuffle=False, 
+    sort=True
+):
     X_path, Y_trans, Y_rot = [], [], []
     X_len = []
 
@@ -23,7 +33,13 @@ def get_data_info(folder_list, seq_len_range, overlap, sample_times=1,
         start_t = time.time()
 
         # Load error magnitudes
-        errors_df = pd.read_csv(f'{error_dir}/{folder}_rpe_labels.csv')
+        if label_mode == "regression":
+            errors_df = pd.read_csv(f'{error_dir}/{folder}_rpe_labels.csv')
+        elif label_mode == "classification":
+            errors_df = pd.read_csv(f'{error_dir}/{folder}_rpe_labels_classif.csv')
+        else:
+            raise ValueError(f"Unknown label_mode: {label_mode}")
+        
         errors_trans = errors_df['rpe_translation'].to_numpy()  # (n_images-1, )
         errors_rot = errors_df['rpe_rotation'].to_numpy()  # (n_images-1, )
 
@@ -129,7 +145,7 @@ class SortedRandomBatchSampler(Sampler):
     def __len__(self):
         return self.len
     
-class ImageSeqErrorRegDataset(Dataset):
+class ImageSequenceErrorDataset(Dataset):
     def __init__(
         self,
         info_dataframe,
