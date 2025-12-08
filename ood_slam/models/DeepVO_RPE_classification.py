@@ -269,7 +269,7 @@ class DeepVOErrorClassification(BaseModel):
         angle_loss = torch.nn.functional.cross_entropy(rot_logits_flat, y_rot_flat)
         
         # Weight angle loss higher (common in VO tasks)
-        loss = (100 * angle_loss + translation_loss)
+        loss = (angle_loss + translation_loss)
         return loss
     
     def validation_step(self, batch: Tuple[Any, ...]) -> Dict[str, float]:
