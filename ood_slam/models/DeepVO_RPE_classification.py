@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn.init import kaiming_normal_, orthogonal_
 import numpy as np
-from typing import Tuple, Any
+from typing import Tuple, Any, Dict
 from .base_model import BaseModel
 
 def conv(batch_norm, in_planes, out_planes, kernel_size=3, stride=1, dropout=0):
