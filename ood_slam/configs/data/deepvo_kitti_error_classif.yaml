@@ -1,4 +1,4 @@
 defaults:
-  - deepvo_error_reg.yaml
+  - deepvo_kitti_error_reg.yaml
 
 task: "classification"
