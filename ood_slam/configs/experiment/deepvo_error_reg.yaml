@@ -1,11 +1,11 @@
 # @package _global_
 
 defaults:
-  - override /data: deepvo_kitti_error_reg.yaml
+  - override /data: tartanair_deepvo.yaml
   - override /model: deepvo_error_reg.yaml
 
 # Override experiment settings for overfitting
-name: "deepvo_error_reg" 
+name: "deepvo_error_reg_tartanair" 
 max_epochs: 100
 learning_rate: 0.0005
 optimizer: "Adagrad"

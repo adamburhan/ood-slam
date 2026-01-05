@@ -11,6 +11,64 @@ import time
 from ood_slam.data.utils import normalize_angle_delta
 
 
+def parse_tartanair_folder(data_dir, folder_rel_path):
+    """
+    Parses a staged TartanAir sequence.
+    Trusts that labels.csv has N-1 rows for N images.
+    """
+    full_path = os.path.join(data_dir, folder_rel_path)
+    image_dir = os.path.join(full_path, "image_left")
+    
+    # 1. Find ALL Images (The Source of Truth for N)
+    search_pattern = os.path.join(image_dir, "*.png")
+    all_img_abs_paths = sorted(glob.glob(search_pattern))
+    
+    if not all_img_abs_paths:
+        return [], [], []
+
+    # Calculate relative paths
+    img_paths = [os.path.relpath(p, data_dir) for p in all_img_abs_paths]
+
+    # 2. Load Labels
+    csv_path = os.path.join(full_path, "labels.csv")
+    if not os.path.exists(csv_path):
+        return [], [], []
+
+    df = pd.read_csv(csv_path)
+
+    # 3. Validate Length
+    # We expect len(df) == len(images) - 1
+    if len(df) != len(img_paths) - 1:
+        # If mismatch, we can't trust the alignment. Return empty.
+        print(f"Warning: Length mismatch in {folder_rel_path}. "
+              f"Images: {len(img_paths)}, Labels: {len(df)}")
+        return [], [], []
+
+    # 4. Extract Errors
+    # We treat 'exists=0' as NaN so the loader skips those windows
+    valid_mask = (df['exists'] == 1) & (~df['rpe_trans'].isna())
+    
+    trans_errs = df['rpe_trans'].to_numpy()
+    rot_errs = df['rpe_rot'].to_numpy()
+    
+    # Force NaN for invalid rows (if not already done)
+    # This ensures your sliding window 'np.any(np.isnan)' check works
+    trans_errs[~valid_mask] = np.nan
+    rot_errs[~valid_mask] = np.nan
+
+    # Return raw N-1 arrays. 
+    # get_data_info will see len == N-1 and prepend the NaN for alignment.
+    return img_paths, trans_errs, rot_errs
+
+def parse_kitti_folder(data_dir, folder):
+    pass
+
+def parse_euroc_folder(data_dir, folder):
+    pass
+
+def parse_eth3d_folder(data_dir, folder):
+    pass
+
 def get_data_info(
     folder_list, 
     seq_len_range, 
@@ -21,7 +79,8 @@ def get_data_info(
     image_dir=None, 
     label_mode="regression", 
     shuffle=False, 
-    sort=True
+    sort=True,
+    dataset_type="tartanair"
 ):
     X_path, Y_trans, Y_rot = [], [], []
     X_len = []
@@ -32,29 +91,34 @@ def get_data_info(
     for folder in folder_list:
         start_t = time.time()
 
-        # Load error magnitudes
-        if label_mode == "regression":
-            errors_df = pd.read_csv(f'{error_dir}/{folder}_rpe_labels.csv')
-        elif label_mode == "classification":
-            errors_df = pd.read_csv(f'{error_dir}/{folder}_rpe_labels_classif.csv')
-        else:
-            raise ValueError(f"Unknown label_mode: {label_mode}")
+        # # Load error magnitudes
+        # if label_mode == "regression":
+        #     errors_df = pd.read_csv(f'{error_dir}/{folder}_rpe_labels.csv')
+        # elif label_mode == "classification":
+        #     errors_df = pd.read_csv(f'{error_dir}/{folder}_rpe_labels_classif.csv')
+        # else:
+        #     raise ValueError(f"Unknown label_mode: {label_mode}")
         
-        errors_trans = errors_df['rpe_translation'].to_numpy()  # (n_images-1, )
-        errors_rot = errors_df['rpe_rotation'].to_numpy()  # (n_images-1, )
+        if dataset_type == "tartanair":
+            fpaths, errors_trans, errors_rot = parse_tartanair_folder(data_dir, folder)
+        elif dataset_type == "kitti":
+            fpaths, errors_trans, errors_rot = parse_kitti_folder(data_dir, folder)
+        elif dataset_type == "euroc":
+            fpaths, errors_trans, errors_rot = parse_euroc_folder(data_dir, folder)
+        elif dataset_type == "eth3d":
+            fpaths, errors_trans, errors_rot = parse_eth3d_folder(data_dir, folder)
+        else:
+            raise ValueError(f"Unknown dataset_type: {dataset_type}")
 
-        # Load image paths
-        fpaths = glob.glob('{}{}/*.png'.format(image_dir, folder))
-        fpaths.sort()
         n_images = len(fpaths)
         
         # sanity check
         if len(errors_trans) == n_images - 1:
             # Pad a dummy at the beggining so that:
             # error[t] = RPE between frame t-1 and t, t >= 1
-            # error[0] = -1 (invalid value)
-            errors_trans = np.insert(errors_trans, 0, -1)
-            errors_rot = np.insert(errors_rot, 0, -1)
+            # error[0] = nan (invalid value)
+            errors_trans = np.insert(errors_trans, 0, np.nan)
+            errors_rot = np.insert(errors_rot, 0, np.nan)
         elif len(errors_trans) != n_images:
             raise ValueError(
                 f"Unexpected length mismatch in folder {folder}: "
@@ -85,8 +149,8 @@ def get_data_info(
                     continue
 
                 # We will use indices 1...seq_len-1 for the loss (because of y[:,1:])
-                # so require those to be valid (not -1)
-                if np.any(trans_seg[1:] < 0) or np.any(rot_seg[1:] < 0):
+                # so require those to be valid (not nan)
+                if np.any(np.isnan(trans_seg[1:])) or np.any(np.isnan(rot_seg[1:])):
                     continue
             
                 X_path.append(x_seg)

@@ -22,23 +22,60 @@ hydra:
     # - export LD_PRELOAD=/some/folder/with/libraries/
 
     setup:
-      - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/ $SLURM_TMPDIR/KITTI/
-      - |
-        # Extract tar files in images directory  
-        IMAGES_DIR="$SLURM_TMPDIR/KITTI/images"
-        if [ -d "$IMAGES_DIR" ]; then
-          echo "Extracting sequence tar files..."
-          for tar_file in "$IMAGES_DIR"/*.tar; do
-            if [ -f "$tar_file" ]; then
-              echo "Extracting $tar_file"
-              tar -xf "$tar_file" -C "$IMAGES_DIR"
-              rm "$tar_file"  # Save space on compute node
-            fi
-          done
-          echo "Extraction complete. Available sequences:"
-          ls -1 "$IMAGES_DIR" | grep "^[0-9][0-9]$"
-        fi
       - module load httpproxy
+      # Ensure unzip is available (usually is, but good practice)
+      # - module load unzip 
+      - |
+        echo "STAGING START"
+        
+        # 1. DEFINITIONS 
+        REPO_ROOT="/home/adamb14/repos/ood_slam"
+        DATA_SOURCE="/home/adamb14/scratch/ood_slam/datasets/tartanair"
+        RESULTS_SOURCE="/home/adamb14/scratch/ood_slam/results/tartanair/orbslam2"
+        DEST="$SLURM_TMPDIR"
+        
+        # 2. MERGE SPLITS TO GET FILE LIST
+        # We concatenate train and val txt files to loop over everything we need
+        # Note: We use the absolute path to repo_root to find the splits
+        SEQS=$(cat $REPO_ROOT/splits/tartanair_train.txt $REPO_ROOT/splits/tartanair_val.txt)
+        
+        # 3. LOOP AND STAGE
+        for seq in $SEQS; do
+            # seq example: "abandonedfactory/Easy/P001"
+            
+            # Create the parent directory structure in TMPDIR
+            # e.g. $SLURM_TMPDIR/abandonedfactory/Easy
+            PARENT_DIR="$DEST/$(dirname "$seq")"
+            mkdir -p "$PARENT_DIR"
+            
+            # A. IMAGE EXTRACTION
+            ZIP_FILE="$DATA_SOURCE/$seq.zip"
+            if [ -f "$ZIP_FILE" ]; then
+                # Unzip quietly (-q) and overwrite (-o)
+                # Assumes zip file contains the folder "P001" inside it.
+                # If your zip contains flat files, change -d to "$DEST/$seq"
+                unzip -q -o "$ZIP_FILE" -d "$PARENT_DIR"
+            else
+                echo "Warning: Zip file not found: $ZIP_FILE"
+            fi
+            
+            # B. LABEL MERGING 
+            # We manually copy the CSV from results to the image folder in TMPDIR
+            LABEL_SRC="$RESULTS_SOURCE/$seq/labels.csv"
+            # The target folder should now exist from the unzip
+            LABEL_DST="$DEST/$seq/labels.csv"
+            
+            if [ -f "$LABEL_SRC" ]; then
+                # Ensure target dir exists (in case zip failed but we have labels)
+                mkdir -p "$DEST/$seq" 
+                cp "$LABEL_SRC" "$LABEL_DST"
+            else
+                echo "Warning: Label CSV not found: $LABEL_SRC"
+            fi
+        done
+        
+        echo "Staged TartanAir data to $DEST"
+        echo "STAGING DONE"
 
     # setup:
     #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/flownets_EPE1.951.pth $SLURM_TMPDIR/KITTI/
