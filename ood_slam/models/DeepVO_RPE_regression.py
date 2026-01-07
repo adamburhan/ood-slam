@@ -248,13 +248,13 @@ class DeepVOErrorRegression(BaseModel):
         predicted_trans_mag, predicted_rot_mag = self.forward(x)
         
         # Align sequence lengths - forward() reduces seq_len by 1 due to pair concatenation
-        y_trans_mag = y_trans_mag[:, 1:, :]  # (batch, seq-1, 1)
-        y_rot_mag = y_rot_mag[:, 1:, :]      # (batch, seq-1, 1)
+        y_trans_mag = y_trans_mag[:, :-1, :]  # (batch, seq-1, 1)
+        y_rot_mag = y_rot_mag[:, :-1, :]      # (batch, seq-1, 1)
         
         # MSE Loss for magnitudes
         translation_loss = torch.nn.functional.mse_loss(predicted_trans_mag, y_trans_mag)
         angle_loss = torch.nn.functional.mse_loss(predicted_rot_mag, y_rot_mag)
         
         # Weight angle loss higher (common in VO tasks)
-        loss = (100 * angle_loss + translation_loss)
+        loss = (angle_loss + translation_loss)
         return loss

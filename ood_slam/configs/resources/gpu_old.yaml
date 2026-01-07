@@ -1,0 +1,92 @@
+# @package _global_
+defaults:
+  - override /hydra/launcher: patched_submitit_slurm
+
+hydra:
+  mode: MULTIRUN
+  launcher:
+    cpus_per_task: 4
+    gpus_per_node: 1
+    array_parallelism: 16 # max num of jobs to run in parallel
+    # Other things to pass to `sbatch`:
+    additional_parameters:
+      time: 1-00:00:00 # maximum wall time allocated for the job (D-HH:MM:SS)
+      # TODO: It would be better to have those be arguments to the launcher (as is the case in the
+      # RemoteLauncherPlugin), that way we could use only SLURM argument names..
+      nodes: 1
+      mem: 64G
+      ntasks_per_node: 1
+
+    ## A list of commands to add to the generated sbatch script before running srun:
+    # setup:
+    # - export LD_PRELOAD=/some/folder/with/libraries/
+
+    setup:
+      - module load httpproxy
+      # Ensure unzip is available (usually is, but good practice)
+      # - module load unzip 
+      - |
+        echo "STAGING START"
+
+        rsync -avP /home/adamb14/scratch/ood_slam/datasets/kitti/processed/flownets_EPE1.951.pth $SLURM_TMPDIR/KITTI/
+        rsync -avP /home/adamb14/scratch/ood_slam/datasets/kitti/processed/t000102050809_v04060710_im184x608_s5x7_b8_rnn1000_optAdagrad_lr0.0005.model.train $SLURM_TMPDIR/KITTI/
+        
+        # 1. DEFINITIONS 
+        REPO_ROOT="/home/adamb14/repos/ood-slam"
+        DATA_SOURCE="/home/adamb14/scratch/ood_slam/datasets/tartanair_zipped"
+        RESULTS_SOURCE="/home/adamb14/scratch/ood_slam/results/tartanair/orbslam2"
+        DEST="$SLURM_TMPDIR"
+        
+        # 2. MERGE SPLITS TO GET FILE LIST
+        # We concatenate train and val txt files to loop over everything we need
+        # Note: We use the absolute path to repo_root to find the splits
+        SEQS=$(cat $REPO_ROOT/splits/tartanair_train.txt $REPO_ROOT/splits/tartanair_val.txt)
+        
+        # 3. LOOP AND STAGE
+        for seq in $SEQS; do
+            # seq example: "abandonedfactory/Easy/P001"
+            
+            # Create the parent directory structure in TMPDIR
+            # e.g. $SLURM_TMPDIR/abandonedfactory/Easy
+            PARENT_DIR="$DEST/$(dirname "$seq")"
+            mkdir -p "$PARENT_DIR"
+            
+            # A. IMAGE EXTRACTION
+            ZIP_FILE="$DATA_SOURCE/$seq.zip"
+            if [ -f "$ZIP_FILE" ]; then
+                # Unzip quietly (-q) and overwrite (-o)
+                # Assumes zip file contains the folder "P001" inside it.
+                # If your zip contains flat files, change -d to "$DEST/$seq"
+                unzip -q -o "$ZIP_FILE" -d "$PARENT_DIR"
+            else
+                echo "Warning: Zip file not found: $ZIP_FILE"
+            fi
+            
+            # B. LABEL MERGING 
+            # We manually copy the CSV from results to the image folder in TMPDIR
+            LABEL_SRC="$RESULTS_SOURCE/$seq/labels.csv"
+            # The target folder should now exist from the unzip
+            LABEL_DST="$DEST/$seq/labels.csv"
+            
+            if [ -f "$LABEL_SRC" ]; then
+                # Ensure target dir exists (in case zip failed but we have labels)
+                mkdir -p "$DEST/$seq" 
+                cp "$LABEL_SRC" "$LABEL_DST"
+            else
+                echo "Warning: Label CSV not found: $LABEL_SRC"
+            fi
+        done
+        
+        echo "Staged TartanAir data to $DEST"
+        echo "STAGING DONE"
+
+    # setup:
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/flownets_EPE1.951.pth $SLURM_TMPDIR/KITTI/
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/t000102050809_v04060710_im184x608_s5x7_b8_rnn1000_optAdagrad_lr0.0005.model.train $SLURM_TMPDIR/KITTI/
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/pose_GT $SLURM_TMPDIR/KITTI/
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/errors $SLURM_TMPDIR/KITTI/
+    #   - mkdir -p $SLURM_TMPDIR/KITTI/images
+    #   - rsync -avP /home/adamb14/scratch/ood_slam/datasets/KITTI/processed/images/04.tar $SLURM_TMPDIR/KITTI/images
+    #   - tar -xf $SLURM_TMPDIR/KITTI/images/04.tar -C $SLURM_TMPDIR/KITTI/images/
+    #   - rm $SLURM_TMPDIR/KITTI/images/04.tar
+    #   - module load httpproxy

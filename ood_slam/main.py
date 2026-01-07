@@ -20,6 +20,7 @@ from hydra_plugins.auto_schema import auto_schema_plugin
 import ood_slam
 from ood_slam import configs  # Import to trigger config registration
 from ood_slam.utils import remote_launcher_plugin  # Import to register patched launcher
+from ood_slam.utils.staging import stage_dataset
 
 from ood_slam.trainer import train
 
@@ -58,6 +59,8 @@ log = logging.getLogger(__name__)
 )
 def main(cfg: DictConfig) -> None:
     log.info(f"Config:\n{OmegaConf.to_yaml(cfg)}")
+    
+    stage_dataset(cfg)
     
     # Setup device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

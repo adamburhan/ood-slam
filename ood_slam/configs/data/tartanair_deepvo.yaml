@@ -36,6 +36,5 @@ cache_dir: null  # Will use default: {data_dir}/datainfo
 batch_size: ${batch_size}
 num_workers: 4
 pin_memory: true
-use_cache: true
 overfit: false
 task: "regression"

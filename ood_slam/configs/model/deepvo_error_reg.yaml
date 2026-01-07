@@ -1,6 +1,6 @@
 _target_: ood_slam.models.DeepVO_RPE_regression.DeepVOErrorRegression
-img_h: 184  # Image height
-img_w: 608  # Image width  
+img_w: 320
+img_h: 256 
 clip: 5.0  # Gradient clipping norm
 rnn_hidden_size: 1000
 conv_dropout: [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.5]

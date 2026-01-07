@@ -150,7 +150,8 @@ class ImageSequenceErrorDataModule:
             new_size=(self.img_w, self.img_h),  
             img_mean=self.img_means, 
             img_std=self.img_stds, 
-            minus_point_5=self.minus_point_5
+            minus_point_5=self.minus_point_5,
+            data_dir=self.data_dir
         )
         
         self.valid_dataset = ImageSequenceErrorDataset(
@@ -159,7 +160,8 @@ class ImageSequenceErrorDataModule:
             new_size=(self.img_w, self.img_h),
             img_mean=self.img_means, 
             img_std=self.img_stds, 
-            minus_point_5=self.minus_point_5
+            minus_point_5=self.minus_point_5,
+            data_dir=self.data_dir
         )
         
         print('Number of samples in training dataset: ', len(self.train_df.index))

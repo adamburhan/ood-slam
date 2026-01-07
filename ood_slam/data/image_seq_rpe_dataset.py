@@ -61,10 +61,72 @@ def parse_tartanair_folder(data_dir, folder_rel_path):
     return img_paths, trans_errs, rot_errs
 
 def parse_kitti_folder(data_dir, folder):
-    pass
+    full_path = os.path.join(data_dir, folder)
+    image_dir = os.path.join(full_path, "image_0")
+
+    search_pattern = os.path.join(image_dir, "*.png")
+    all_img_abs_paths = sorted(glob.glob(search_pattern))
+
+    if not all_img_abs_paths:
+        return [], [], []
+
+    img_paths = [os.path.relpath(p, data_dir) for p in all_img_abs_paths]
+
+    csv_path = os.path.join(full_path, "labels.csv")
+    if not os.path.exists(csv_path):
+        return [], [], []
+
+    df = pd.read_csv(csv_path)
+
+    if len(df) != len(img_paths) - 1:
+        # If mismatch, we can't trust the alignment. Return empty.
+        print(f"Warning: Length mismatch in {folder}. "
+              f"Images: {len(img_paths)}, Labels: {len(df)}")
+        return [], [], []
+    
+    valid_mask = (df['exists'] == 1) & (~df['rpe_trans'].isna())
+    
+    trans_errs = df['rpe_trans'].to_numpy()
+    rot_errs = df['rpe_rot'].to_numpy()
+    
+    trans_errs[~valid_mask] = np.nan
+    rot_errs[~valid_mask] = np.nan
+
+    return img_paths, trans_errs, rot_errs
 
 def parse_euroc_folder(data_dir, folder):
-    pass
+    full_path = os.path.join(data_dir, folder)
+    image_dir = os.path.join(full_path, "mav0", "cam0", "data")
+
+    search_pattern = os.path.join(image_dir, "*.png")
+    all_img_abs_paths = sorted(glob.glob(search_pattern))
+
+    if not all_img_abs_paths:
+        return [], [], []
+
+    img_paths = [os.path.relpath(p, data_dir) for p in all_img_abs_paths]
+
+    csv_path = os.path.join(full_path, "labels.csv")
+    if not os.path.exists(csv_path):
+        return [], [], []
+
+    df = pd.read_csv(csv_path)
+
+    if len(df) != len(img_paths) - 1:
+        # If mismatch, we can't trust the alignment. Return empty.
+        print(f"Warning: Length mismatch in {folder}. "
+              f"Images: {len(img_paths)}, Labels: {len(df)}")
+        return [], [], []
+    
+    valid_mask = (df['exists'] == 1) & (~df['rpe_trans'].isna())
+    
+    trans_errs = df['rpe_trans'].to_numpy()
+    rot_errs = df['rpe_rot'].to_numpy()
+    
+    trans_errs[~valid_mask] = np.nan
+    rot_errs[~valid_mask] = np.nan
+
+    return img_paths, trans_errs, rot_errs
 
 def parse_eth3d_folder(data_dir, folder):
     pass
@@ -114,11 +176,10 @@ def get_data_info(
         
         # sanity check
         if len(errors_trans) == n_images - 1:
-            # Pad a dummy at the beggining so that:
-            # error[t] = RPE between frame t-1 and t, t >= 1
-            # error[0] = nan (invalid value)
-            errors_trans = np.insert(errors_trans, 0, np.nan)
-            errors_rot = np.insert(errors_rot, 0, np.nan)
+            # error[t] = RPE between frame t and t + 1, t in [0, n_images-2]
+            # error[n_images - 1] = nan (invalid value)
+            errors_trans = np.append(errors_trans, np.nan)
+            errors_rot = np.append(errors_rot, np.nan)
         elif len(errors_trans) != n_images:
             raise ValueError(
                 f"Unexpected length mismatch in folder {folder}: "
@@ -148,9 +209,9 @@ def get_data_info(
                 if len(x_seg) != seq_len or len(trans_seg) != seq_len:
                     continue
 
-                # We will use indices 1...seq_len-1 for the loss (because of y[:,1:])
+                # We will use indices 0...seq_len-2 for the loss (i.e., y[:,:-1])
                 # so require those to be valid (not nan)
-                if np.any(np.isnan(trans_seg[1:])) or np.any(np.isnan(rot_seg[1:])):
+                if np.any(np.isnan(trans_seg[:-1])) or np.any(np.isnan(rot_seg[:-1])):
                     continue
             
                 X_path.append(x_seg)
@@ -217,8 +278,11 @@ class ImageSequenceErrorDataset(Dataset):
         new_size=None,
         img_mean=None,
         img_std=(1, 1, 1),
-        minus_point_5=False
+        minus_point_5=False,
+        data_dir=None
     ):
+        self.data_dir = data_dir
+
         # Transforms
         transform_ops = []
         if resize_mode == "crop":
@@ -244,6 +308,8 @@ class ImageSequenceErrorDataset(Dataset):
         
         image_sequence = []
         for img_path in image_path_sequence:
+            if self.data_dir is not None:
+                img_path = os.path.join(self.data_dir, img_path)
             img_as_img = Image.open(img_path)
             img_as_tensor = self.transformer(img_as_img)
             if self.minus_point_5:
