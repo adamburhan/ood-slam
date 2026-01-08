@@ -5,6 +5,7 @@ import os
 import hashlib
 from pathlib import Path
 from ood_slam.data.image_seq_rpe_dataset import SortedRandomBatchSampler, ImageSequenceErrorDataset, get_data_info
+from omegaconf import ListConfig
 
 # Helper function to resolve splits
 def load_sequence_list(seq_param, base_dir=None):
@@ -15,7 +16,7 @@ def load_sequence_list(seq_param, base_dir=None):
     Returns:
         List of sequence strings
     """
-    if isinstance(seq_param, (list, tuple)):
+    if isinstance(seq_param, (list, tuple, ListConfig)):
         return seq_param
     
     if isinstance(seq_param, str) and seq_param.endswith('.txt'):

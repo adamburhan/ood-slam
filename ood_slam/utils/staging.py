@@ -1,6 +1,7 @@
 import os 
 import subprocess
 import logging
+from omegaconf import ListConfig
 
 log = logging.getLogger(__name__)
 
@@ -29,11 +30,23 @@ def stage_dataset(cfg):
         # We assume the split files are in repo_root/splits
         splits = ["splits/kitti_train.txt", "splits/kitti_val.txt"]
         seqs = []
-        for s_file in splits:
-            path = os.path.join(repo_root, s_file)
-            if os.path.exists(path):
-                with open(path, 'r') as f:
-                    seqs.extend([line.strip() for line in f if line.strip()])
+
+        for seq_source in [cfg.data.train_sequences, cfg.data.valid_sequences]:
+            
+            # Case A: It's a List (Command Line Override: ["04"])
+            if isinstance(seq_source, (list, ListConfig)):
+                seqs.extend(seq_source)
+            
+            # Case B: It's a String (Config File: "splits/kitti_train.txt")
+            elif isinstance(seq_source, str):
+                if os.path.exists(seq_source):
+                    with open(seq_source, 'r') as f:
+                        seqs.extend([line.strip() for line in f if line.strip()])
+                else:
+                    log.warning(f"Sequence file not found: {seq_source}")
+
+        # Deduplicate (in case you use '04' for both train and val debugging)
+        seqs = sorted(list(set(seqs)))
         
         for seq in seqs:
             seq_dir = os.path.join(dest, seq)
@@ -43,7 +56,10 @@ def stage_dataset(cfg):
             archive = os.path.join(data_source, f"{seq}.tar.gz")
             if os.path.exists(archive):
                 log.info(f"Extracting {seq}...")
-                subprocess.run(["tar", "-xf", archive, "-C", seq_dir], check=True)
+                subprocess.run(
+                    ["tar", "-xf", archive, "-C", dest, "--strip-components=1"], 
+                    check=True
+                )
             
             # Copy Labels
             label_src = os.path.join(results_source, seq, "labels.csv")
@@ -118,4 +134,15 @@ def stage_dataset(cfg):
     else:
         log.error(f"Unknown dataset_type for staging: {dataset_type}")
         
+    # --- DEBUG: Print directory structure ---
+    log.info(f"DEBUG: Listing contents of {dest}/04 to check structure:")
+    walk_count = 0
+    for root, dirs, files in os.walk(os.path.join(dest, "04")):
+        if walk_count > 3: break # Don't print too much
+        log.info(f"  Root: {root}")
+        log.info(f"  Dirs: {dirs}")
+        log.info(f"  Files (first 3): {files[:3]}")
+        walk_count += 1
+    # ----------------------------------------
+
     log.info("STAGING DONE")
