@@ -69,8 +69,10 @@ class ComprehensiveDataset(Dataset):
         idx_to_fname = {i: f.name for i, f in enumerate(all_files)}
 
         for i, row in df.iterrows():
-            if row.get('exists', 1) != 1 or pd.isna(row['rpe_trans']): continue
+            if (row.get('valid', 1) != 1) or pd.isna(row['rpe_trans']): continue
             if i + 1 >= len(df): break
+
+            # row[i] represents rpe from frame i to i+1
             
             curr_id = int(row.iloc[0])
             next_id = int(df.iloc[i+1, 0])

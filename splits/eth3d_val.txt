@@ -1,0 +1,9 @@
+mannequin_3
+mannequin_face_1
+einstein_1
+planar_2
+einstein_global_light_changes_1
+sfm_house_loop
+sfm_bench
+einstein_global_light_changes_3
+plant_1
